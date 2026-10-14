@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../engine/scoring.dart';
 import '../models/mission.dart';
-import 'db_helper.dart';
+import '../data/mission_seed.dart';
 
 enum MissionStatus { locked, open, done }
 
@@ -14,7 +14,7 @@ class MissionResult {
   const MissionResult(this.score, this.stars);
 }
 
-/// State global: daftar misi (SQLite) + progres pemain (SharedPreferences).
+/// State global: daftar misi (data/mission_seed.dart) + progres pemain (SharedPreferences).
 class GameProvider extends ChangeNotifier {
   List<Mission> missions = [];
   final Map<int, MissionResult> results = {};
@@ -30,7 +30,7 @@ class GameProvider extends ChangeNotifier {
 
   Future<void> load() async {
     final p = _p = await SharedPreferences.getInstance();
-    missions = await DbHelper.instance.getMissions();
+    missions = kMissions; // misi ditulis manual di data/mission_seed.dart
     currentLevel = p.getInt('current_level') ?? 1;
     onboarded = p.getBool('onboarded') ?? false;
     final raw = p.getString('mission_scores');

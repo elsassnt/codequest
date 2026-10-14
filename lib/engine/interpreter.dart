@@ -1,4 +1,9 @@
 import '../models/mission.dart';
+
+/// Pseudo-interpreter Python sederhana (bukan Python asli).
+/// Mendukung: komentar, assignment, + - * /, perbandingan, for-range, while,
+/// if/else, def (tanpa parameter), print, dan perintah py.*.
+
 enum StepType { move, blocked, coin }
 
 class Step {
