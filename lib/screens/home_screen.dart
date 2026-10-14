@@ -47,7 +47,7 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(28, 18, 28, 24),
                 children: [
                   for (var i = 0; i < gm.missions.length; i++)
-                    _missionFolder(context, gm, gm.missions[i], _folderColors[i]),
+                    _missionFolder(context, gm, gm.missions[i], _folderColors[i % _folderColors.length]),
                   _progressFolder(context, gm),
                 ],
               ),

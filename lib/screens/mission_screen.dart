@@ -25,7 +25,7 @@ class _MissionScreenState extends State<MissionScreen> {
   final _focus = FocusNode();
   late int _px, _py;
   Set<Pt> _collected = {};
-  bool _running = false, _sysKb = false, _showKb = true;
+  bool _running = false, _sysKb = false, _showKb = true, _cancel = false;
   int _hints = 0;
   List<String> _logs = [];
  
@@ -109,7 +109,8 @@ class _MissionScreenState extends State<MissionScreen> {
   Future<void> _run() async {
     if (_running) return;
     final gm = context.read<GameProvider>();
-    _reset();
+    _reset();  
+    _cancel = false;
     setState(() => _running = true);
     final res = Interpreter(m).run(_code.text);
  
@@ -124,13 +125,19 @@ class _MissionScreenState extends State<MissionScreen> {
           _collected = {..._collected, Pt(s.x, s.y)};
         }
       });
+      if (_cancel) break;
     }
     if (!mounted) return;
     setState(() {
       _running = false;
       _logs = res.logs;
     });
- 
+    if (_cancel) {
+      _cancel = false;
+      _reset();
+      setState(() => _running = false);
+      return;
+    }
     if (res.error != null) {
       await _msg('Ada yang salah', res.error!);
       return;
@@ -157,7 +164,7 @@ class _MissionScreenState extends State<MissionScreen> {
       ),
     ));
   }
- 
+ void _stop() => setState(() => _cancel = true);
   // ───────── operasi editor ─────────
  
   TextSelection get _sel => _code.selection.isValid
@@ -315,7 +322,7 @@ class _MissionScreenState extends State<MissionScreen> {
             icon: Icon(Icons.keyboard_alt_outlined, color: _sysKb ? AppColors.accent : null),
           ),
           const SizedBox(width: 6),
-          Expanded(child: GradientButton(label: _running ? 'MENJALANKAN...' : '▶  RUN', onTap: _running ? null : _run)),
+          Expanded(child: GradientButton(label: _running ? (_cancel ? 'MENGHENTIKAN...' : '■  STOP') : '▶  RUN',onTap: _running ? (_cancel ? null : _stop) : _run,)),
         ],
       ),
     );

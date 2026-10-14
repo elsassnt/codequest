@@ -19,7 +19,7 @@ final List<Mission> kMissions = [
     startX: 0,
     startY: 1,
     finishX: 5,
-    finishY: 2,
+    finishY: 1,
     coins: [Pt(2, 1), Pt(4, 1)],
     optimalLines: 2,
     starterCode: '# Simpan jumlah langkah di variabel\n',
@@ -122,41 +122,6 @@ final List<Mission> kMissions = [
   const Mission(
     id: 5,
     title: 'Fungsi Tangga',
-    description:
-        'Buat fungsi untuk satu anak tangga, lalu panggil berulang kali.',
-    material:
-        'FUNGSI (def)\n\nFungsi adalah kumpulan perintah yang diberi nama.\n\n'
-        'def tangga():\n    py.gerak_kanan()\n    py.gerak_atas()\n\n'
-        'Fungsi baru berjalan saat dipanggil:\ntangga()\n\n'
-        'Fungsi + perulangan membuat kode lebih ringkas.',
-    gridW: 5,
-    gridH: 5,
-    startX: 0,
-    startY: 4,
-    finishX: 4,
-    finishY: 0,
-    coins: [Pt(1, 3), Pt(2, 2), Pt(3, 1)],
-    obstacles: [
-      Pt(0, 3),
-      Pt(1, 2),
-      Pt(2, 1),
-      Pt(3, 0),
-      Pt(2, 4),
-      Pt(3, 3),
-      Pt(4, 2)
-    ],
-    optimalLines: 5,
-    hints: [
-      'Satu anak tangga = kanan lalu atas.',
-      'Buat def tangga(): berisi gerak kanan dan atas, lalu panggil tangga().',
-      'def tangga(): ... lalu for i in range(4): tangga()',
-    ],
-    requiredPattern: r'^\s*def\b',
-    requiredMessage: 'Misi ini harus membuat fungsi dengan def.',
-  ),
-  const Mission(
-    id: 6,
-    title: 'Fungsi Tangga 2',
     description:
         'Buat fungsi untuk satu anak tangga, lalu panggil berulang kali.',
     material:

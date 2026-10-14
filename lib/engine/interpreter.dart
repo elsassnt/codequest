@@ -1,9 +1,4 @@
 import '../models/mission.dart';
-
-/// Pseudo-interpreter Python sederhana (bukan Python asli).
-/// Mendukung: komentar, assignment, + - * /, perbandingan, for-range, while,
-/// if/else, def (tanpa parameter), print, dan perintah py.*.
-
 enum StepType { move, blocked, coin }
 
 class Step {
@@ -78,6 +73,7 @@ class _P {
 }
 
 const _maxOps = 5000;
+const _maxSteps = 150;
 const _pyCmds = {'gerak_kanan', 'gerak_kiri', 'gerak_atas', 'gerak_bawah', 'ambil_koin'};
 
 class Interpreter {
@@ -303,10 +299,16 @@ class Interpreter {
     for (var i = 0; i < n; i++) {
       final nx = e.px + dx, ny = e.py + dy;
       final p = Pt(nx, ny);
-      if (nx < 0 || ny < 0 || nx >= mission.gridW || ny >= mission.gridH || mission.obstacles.contains(p)) {
+      final outside = nx < 0 || ny < 0 || nx >= mission.gridW || ny >= mission.gridH;
+      if (outside || mission.obstacles.contains(p)) {
         e.steps.add(Step(StepType.blocked, e.px, e.py));
-        e.logs.add('Baris ${s.line}: Py terhalang, tidak bisa lewat!');
-        break;
+        throw _ExecError(outside
+            ? 'Baris ${s.line}: Py keluar dari peta, program dihentikan.'
+            : 'Baris ${s.line}: Py menabrak batu, program dihentikan.');
+      }
+      if (e.steps.length >= _maxSteps) {
+        throw _ExecError(
+            'Baris ${s.line}: Py bergerak terlalu banyak (maks $_maxSteps langkah). Cek lagi perulanganmu.');
       }
       e.px = nx;
       e.py = ny;
