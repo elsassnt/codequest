@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../engine/scoring.dart';
 import '../models/mission.dart';
-import '../data/mission_seed.dart';
+import 'mission_repository.dart';
 
 enum MissionStatus { locked, open, done }
 
@@ -14,7 +14,7 @@ class MissionResult {
   const MissionResult(this.score, this.stars);
 }
 
-/// State global: daftar misi (data/mission_seed.dart) + progres pemain (SharedPreferences).
+/// State global: daftar misi (cloud + cadangan data/mission_seed.dart) + progres pemain (SharedPreferences).
 class GameProvider extends ChangeNotifier {
   List<Mission> missions = [];
   final Map<int, MissionResult> results = {};
@@ -23,6 +23,7 @@ class GameProvider extends ChangeNotifier {
   bool onboarded = false;
   bool loaded = false;
   SharedPreferences? _p;
+  final _repo = MissionRepository();
 
   int get totalScore => results.values.fold(0, (a, r) => a + r.score);
   int get totalStars => results.values.fold(0, (a, r) => a + r.stars);
@@ -30,7 +31,7 @@ class GameProvider extends ChangeNotifier {
 
   Future<void> load() async {
     final p = _p = await SharedPreferences.getInstance();
-    missions = kMissions; // misi ditulis manual di data/mission_seed.dart
+    missions = await _repo.loadLocal(); // cache cloud, atau misi bawaan
     currentLevel = p.getInt('current_level') ?? 1;
     onboarded = p.getBool('onboarded') ?? false;
     final raw = p.getString('mission_scores');
@@ -44,6 +45,17 @@ class GameProvider extends ChangeNotifier {
       (jsonDecode(hu) as Map<String, dynamic>).forEach((k, v) => hintUsed[k] = v as int);
     }
     loaded = true;
+    notifyListeners();
+    _refreshCloud(); // di latar belakang, tidak menghambat app dibuka
+  }
+
+  /// Cek misi baru di cloud. Gagal / offline = diam saja.
+  Future<void> _refreshCloud() async {
+    final fresh = await _repo.fetchCloud();
+    if (fresh == null) return;
+    String sig(List<Mission> l) => jsonEncode(l.map((m) => m.toJson()).toList());
+    if (sig(fresh) == sig(missions)) return;
+    missions = fresh;
     notifyListeners();
   }
 

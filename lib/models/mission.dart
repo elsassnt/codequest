@@ -10,7 +10,23 @@ class Pt {
   int get hashCode => x * 1000 + y;
 
   List<int> toJson() => [x, y];
-  factory Pt.fromJson(dynamic j) => Pt(j[0] as int, j[1] as int);
+  factory Pt.fromJson(dynamic j) {
+    final l = asList(j);
+    return Pt((l[0] as num).toInt(), (l[1] as num).toInt());
+  }
+}
+
+/// Mengubah data JSON jadi List. Firebase Realtime Database kadang
+/// mengirim array sebagai Map ber-kunci angka, dan membuang array kosong.
+List<dynamic> asList(dynamic v) {
+  if (v == null) return [];
+  if (v is List) return v.where((e) => e != null).toList();
+  if (v is Map) {
+    final keys = v.keys.toList()
+      ..sort((a, b) => (int.tryParse('$a') ?? 0).compareTo(int.tryParse('$b') ?? 0));
+    return [for (final k in keys) v[k]];
+  }
+  return [];
 }
 
 class Mission {
@@ -87,6 +103,52 @@ class Mission {
       starterCode: (m['starter_code'] as String?) ?? '',
       requiredPattern: (m['required_pattern'] as String?) ?? '',
       requiredMessage: (m['required_message'] as String?) ?? '',
+    );
+  }
+
+  /// Bentuk JSON untuk cloud (dipakai export_missions.dart dan cache).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'material': material,
+        'gridW': gridW,
+        'gridH': gridH,
+        'startX': startX,
+        'startY': startY,
+        'finishX': finishX,
+        'finishY': finishY,
+        'coins': coins.map((e) => e.toJson()).toList(),
+        'obstacles': obstacles.map((e) => e.toJson()).toList(),
+        'optimalLines': optimalLines,
+        'rewardScore': rewardScore,
+        'hints': hints,
+        'starterCode': starterCode,
+        'requiredPattern': requiredPattern,
+        'requiredMessage': requiredMessage,
+      };
+
+  factory Mission.fromJson(Map<String, dynamic> j) {
+    int n(String k) => (j[k] as num).toInt();
+    return Mission(
+      id: n('id'),
+      title: j['title'] as String,
+      description: j['description'] as String,
+      material: j['material'] as String,
+      gridW: n('gridW'),
+      gridH: n('gridH'),
+      startX: n('startX'),
+      startY: n('startY'),
+      finishX: n('finishX'),
+      finishY: n('finishY'),
+      coins: asList(j['coins']).map(Pt.fromJson).toList(),
+      obstacles: asList(j['obstacles']).map(Pt.fromJson).toList(),
+      optimalLines: n('optimalLines'),
+      rewardScore: j['rewardScore'] == null ? 50 : n('rewardScore'),
+      hints: asList(j['hints']).map((e) => '$e').toList(),
+      starterCode: (j['starterCode'] as String?) ?? '',
+      requiredPattern: (j['requiredPattern'] as String?) ?? '',
+      requiredMessage: (j['requiredMessage'] as String?) ?? '',
     );
   }
 }

@@ -1,6 +1,6 @@
 import '../models/mission.dart';
 
-/// Data 5 misi. Koordinat: x ke kanan, y ke bawah, dimulai dari (0,0) kiri-atas.
+/// Data misi
 final List<Mission> kMissions = [
   const Mission(
     id: 1,
